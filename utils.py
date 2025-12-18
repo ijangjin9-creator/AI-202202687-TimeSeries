@@ -14,8 +14,16 @@ def load_bitcoin_data(start_date, end_date, ticker='BTC-USD'):
     yfinance를 사용하여 비트코인 시계열 데이터를 로드합니다.
     """
     df = yf.download(ticker, start=start_date, end=end_date)
-    # yfinance가 대문자로 컬럼명을 반환하므로 소문자로 변경
-    df.columns = [col.lower() for col in df.columns]
+    # yfinance가 대문자 또는 튜플 형태의 컬럼명을 반환하므로 소문자로 통일하여 변경
+    new_columns = []
+    for col in df.columns:
+        if isinstance(col, tuple):
+            # e.g., ('Close', '') -> 'close'
+            new_columns.append(col[0].lower())
+        else:
+            # e.g., 'Close' -> 'close'
+            new_columns.append(str(col).lower())
+    df.columns = new_columns
     return df
 
 def plot_close_price(df, title='Stock Close Price'):
